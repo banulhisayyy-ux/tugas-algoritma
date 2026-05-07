@@ -132,24 +132,38 @@ if menu == "✨ For You Page":
             # Tombol Interaksi (Like, Komen, Share)
             col1, col2, col3 = st.columns(3)
             
-            with col1:
-                # Logika Like Bertambah saat diklik
-                if st.button(f"❤️ {st.session_state[f'likes_{v['id']}']} Likes", key=f"btn_like_{v['id']}"):
-                    st.session_state[f"likes_{v['id']}"] += 1
+        with col1:
+                # Inisialisasi status "apakah sudah diklik" jika belum ada
+                if f"is_liked_{v['id']}" not in st.session_state:
+                    st.session_state[f"is_liked_{v['id']}"] = False
+                
+                # Tentukan warna atau simbol berdasarkan status
+                label_like = f"❤️ {st.session_state[f'likes_{v['id']}']} Liked" if st.session_state[f"is_liked_{v['id']}"] else f"🤍 {st.session_state[f'likes_{v['id']}']} Like"
+                
+                # Logika Klik: Jika diklik, cek statusnya
+                if st.button(label_like, key=f"btn_like_{v['id']}"):
+                    if st.session_state[f"is_liked_{v['id']}"]:
+                        # Jika sebelumnya sudah Like, sekarang jadi UNLIKE
+                        st.session_state[f"likes_{v['id']}"] -= 1
+                        st.session_state[f"is_liked_{v['id']}"] = False
+                    else:
+                        # Jika sebelumnya belum Like, sekarang jadi LIKE
+                        st.session_state[f"likes_{v['id']}"] += 1
+                        st.session_state[f"is_liked_{v['id']}"] = True
                     st.rerun()
                     
-            with col2:
+        with col2:
                 # Logika Tampilkan/Sembunyikan Kolom Komentar
                 if st.button(f"💬 Komentar ({len(v['komentar'])})", key=f"btn_comm_{v['id']}"):
                     st.session_state[f"show_comm_{v['id']}"] = not st.session_state[f"show_comm_{v['id']}"]
                     st.rerun()
                     
-            with col3:
+        with col3:
                 if st.button("🔗 Bagikan", key=f"btn_share_{v['id']}"):
                     st.toast("Link berhasil disalin!")
             
             # Bagian Kolom Komentar (Hanya muncul jika tombol komentar diklik)
-            if st.session_state[f"show_comm_{v['id']}"]:
+        if st.session_state[f"show_comm_{v['id']}"]:
                 st.write("---")
                 st.write("**Komentar Netizen:**")
                 
