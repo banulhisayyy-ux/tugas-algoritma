@@ -1,39 +1,32 @@
-import streamlit as st # type: ignore
-import pandas as pd # type: ignore
-import random
+import streamlit as st
+import pandas as pd
 
-# --- KONFIGURASI HALAMAN MODERN ---
+# --- KONFIGURASI HALAMAN ---
 st.set_page_config(
     page_title="MiniTube-Tok",
-    page_icon="logo.png",
+    page_icon="logo.png", # Menggunakan file logo kamu
     layout="centered"
 )
 
-# --- CSS KUSTOM UNTUK TAMPILAN MODERN ---
-# Kita gunakan CSS agar tampilan Card, Tombol, dan Judul terlihat lebih bersih.
-# --- CSS KUSTOM UNTUK PERBAIKAN TAMPILAN SIDEBAR ---
+# --- CSS KUSTOM UNTUK WARNA & TAMPILAN SIDEBAR ---
 st.markdown("""
 <style>
-    /* 1. Perbaikan Sidebar agar Teks Jelas Terbaca */
-    /* Kita pastikan latar belakang sidebar putih, dan warna teks gelap */
+    /* Mengatasi teks sidebar yang tidak kelihatan */
     [data-testid="stSidebar"] {
-        background-color: #ffffff; /* Latar belakang sidebar putih bersih */
-        color: #1a1a1a !important; /* Paksa warna teks utama jadi hitam/gelap */
-    }
-
-    /* Memastikan teks label di atas menu juga gelap */
-    [data-testid="stSidebar"] p, 
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] div {
+        background-color: #ffffff;
         color: #1a1a1a !important;
     }
-
-    /* Mengatur warna judul di sidebar (StreamFolio) agar tetap Merah */
+    [data-testid="stSidebar"] p, 
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] div,
+    [data-testid="stSidebar"] label {
+        color: #1a1a1a !important;
+    }
     [data-testid="stSidebar"] h1 {
         color: #ff4b4b !important;
     }
-
-    /* 2. Styling untuk Card Video (Agar tetap modern) */
+    
+    /* Styling Card Video */
     [data-testid="stVerticalBlock"] > div:has(div.stVideo) {
         border: 1px solid #e6e6e6;
         border-radius: 15px;
@@ -42,151 +35,172 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         margin-bottom: 25px;
     }
+    .video-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 5px;
+    }
+    .video-meta {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 15px;
+    }
+    .comment-box {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        border-left: 3px solid #ff4b4b;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-
-# --- DATABASE LOKAL LENGKAP (VIDEO BARU) ---
-# Di sini kita gunakan URL video dummy "Big Buck Bunny" dan "Elephant's Dream" yang stabil.
+# --- DATABASE VIDEO ASLI (YOUTUBE) ---
+# Menggunakan video YouTube asli agar judul dan isi videonya sama persis!
 if 'video_db' not in st.session_state:
     st.session_state.video_db = [
         {
             "id": 1, 
-            "judul": "🎬 Petualangan Kelinci Putih: Babak 1", 
+            "judul": "🎬 Trailer Animasi Big Buck Bunny Resmi", 
             "kreator": "Blender Foundation", 
             "tag": "Animasi", 
-            "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", 
-            "likes": 1205
+            "url": "https://www.youtube.com/watch?v=aqz-KE-bpKQ", 
+            "likes": 1205,
+            "komentar": ["Bagus banget animasinya!", "Kelincinya lucu pol!"]
         },
         {
             "id": 2, 
-            "judul": "🐘 Elephant's Dream: Sebuah Kisah Fantasi", 
-            "kreator": "Studio Orange", 
+            "judul": "JAPAN | Sony FX30 | Cinematic Travel Film | Tamron 17-70mm f/2.8", 
+            "kreator": "Jun Chew", 
             "tag": "Hiburan", 
-            "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", 
-            "likes": 850
+            "url": "https://www.youtube.com/watch?v=ChxDEAN8EtY", 
+            "likes": 16200,
+            "komentar": ["Truly beautiful", "Awesome video bro!"]
         },
         {
             "id": 3, 
-            "judul": "👨‍💻 Tutorial Dasar Membuat UI Streamlit", 
-            "kreator": "BudiTech", 
+            "judul": "👨‍💻 Belajar Python Dasar dalam 10 Menit", 
+            "kreator": "Suka Koding", 
             "tag": "Pendidikan", 
-            "url": "https://www.w3schools.com/html/mov_bbb.mp4", # Dummy lainnya
-            "likes": 430
+            "url": "https://www.youtube.com/watch?v=rfscVS0vtbw", 
+            "likes": 430,
+            "komentar": ["Sangat membantu buat pemula!", "Penjelasannya gampang dimengerti."]
         },
         {
             "id": 4, 
-            "judul": "Gaya Hidup Digital di Purbalingga", 
-            "kreator": "LokalKonten", 
-            "tag": "Gaya Hidup", 
-            "url": "https://www.w3schools.com/html/movie.mp4", # Dummy lainnya
-            "likes": 210
-        },
+            "judul": "4K Cinematic | BMW M4 Competition", 
+            "kreator": "Ark Cinematics ", 
+            "tag": "Cinematic", 
+            "url": "https://www.youtube.com/watch?v=MktCSJmpTI4", 
+            "likes": 5721,
+            "komentar": ["Thanks for the edit❤", "this is perfect for edit"]
+        }
     ]
 
-# --- UI SIDEBAR (DENGAN LOGO) ---
+# --- UI SIDEBAR DENGAN LOGO ---
 try:
     st.sidebar.image("logo.png", use_container_width=True)
 except:
     st.sidebar.markdown("<h1 style='text-align: center; color: #ff4b4b;'>MiniTube-Tok</h1>", unsafe_allow_html=True)
 
-st.sidebar.caption("<p style='text-align: center;'>Modern Video App Concept</p>", unsafe_allow_html=True)
+st.sidebar.caption("<p style='text-align: center;'>Aplikasi Video Modern</p>", unsafe_allow_html=True)
 st.sidebar.divider()
 menu = st.sidebar.radio("Main Menu:", ["✨ For You Page", "🔍 Explore", "📤 Upload"])
 
-# --- MODUL 1: TIKTOK MODE (FYP MODERN) ---
+# --- MENU 1: FOR YOU PAGE ---
 if menu == "✨ For You Page":
     st.header("✨ For You Page")
-    st.caption("Nikmati feed video yang dipersonalisasi untukmu.")
+    st.caption("Video pilihan terbaik untuk menemani harimu.")
     st.write("---")
     
-    # Menampilkan video secara acak (simulasi algoritma FYP)
-    videos = st.session_state.video_db.copy()
-    random.shuffle(videos)
-    
-    for v in videos:
-        with st.container():
-            # Styling Judul dan Meta menggunakan CSS class yang dibuat di atas
-            st.markdown(f"<div class='video-title'>{v['judul']}</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='video-meta'>Oleh: {v['kreator']} | Kategori: <b>{v['tag']}</b></div>", unsafe_allow_html=True)
+    for v in st.session_state.video_db:
+        # Inisialisasi state interaksi jika belum ada
+        if f"likes_{v['id']}" not in st.session_state:
+            st.session_state[f"likes_{v['id']}"] = v['likes']
+        if f"show_comm_{v['id']}" not in st.session_state:
+            st.session_state[f"show_comm_{v['id']}"] = False
             
-            # Video Player (Lebar penuh di dalam card)
+        with st.container():
+            st.markdown(f"<div class='video-title'>{v['judul']}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='video-meta'>Kreator: <b>{v['kreator']}</b> | Kategori: <span style='color:#ff4b4b;'>{v['tag']}</span></div>", unsafe_allow_html=True)
+            
+            # Putar video YouTube
             st.video(v['url'])
             
-            # Kolom Tombol Interaksi ala Modern
-            col1, col2, col3 = st.columns([1,1,2])
+            # Tombol Interaksi (Like, Komen, Share)
+            col1, col2, col3 = st.columns(3)
+            
             with col1:
-                st.button(f"❤️ {v['likes']:,}", key=f"like_{v['id']}")
+                # Logika Like Bertambah saat diklik
+                if st.button(f"❤️ {st.session_state[f'likes_{v['id']}']} Likes", key=f"btn_like_{v['id']}"):
+                    st.session_state[f"likes_{v['id']}"] += 1
+                    st.rerun()
+                    
             with col2:
-                st.button("💬 Komentar", key=f"com_{v['id']}")
+                # Logika Tampilkan/Sembunyikan Kolom Komentar
+                if st.button(f"💬 Komentar ({len(v['komentar'])})", key=f"btn_comm_{v['id']}"):
+                    st.session_state[f"show_comm_{v['id']}"] = not st.session_state[f"show_comm_{v['id']}"]
+                    st.rerun()
+                    
             with col3:
-                st.button("🔗 Bagikan", key=f"sh_{v['id']}")
-            st.write(" ") # Jarak tambahan
+                if st.button("🔗 Bagikan", key=f"btn_share_{v['id']}"):
+                    st.toast("Link berhasil disalin!")
+            
+            # Bagian Kolom Komentar (Hanya muncul jika tombol komentar diklik)
+            if st.session_state[f"show_comm_{v['id']}"]:
+                st.write("---")
+                st.write("**Komentar Netizen:**")
+                
+                # Tampilkan list komentar yang sudah ada
+                for k in v['komentar']:
+                    st.markdown(f"<div class='comment-box'>💬 {k}</div>", unsafe_allow_html=True)
+                
+                # Input komentar baru
+                new_comm = st.text_input("Tulis komentar kamu...", key=f"input_comm_{v['id']}", placeholder="Tulis di sini...")
+                if st.button("Kirim", key=f"btn_send_{v['id']}"):
+                    if new_comm:
+                        v['komentar'].append(new_comm)
+                        st.success("Komentar berhasil ditambahkan!")
+                        st.rerun()
 
-# --- MODUL 2: YOUTUBE MODE (EXPLORE MODERN) ---
+# --- MENU 2: EXPLORE ---
 elif menu == "🔍 Explore":
     st.header("🔍 Explore")
+    query = st.text_input("Cari video berdasarkan judul atau kategori...")
     
-    # Search & Filter dalam satu container agar rapi
-    with st.expander("Filter & Pencarian", expanded=True):
-        query = st.text_input("Cari video, kreator, atau tag...")
-        available_tags = list(set([v['tag'] for v in st.session_state.video_db]))
-        tags = st.multiselect("Pilih Kategori:", available_tags)
+    filtered = [v for v in st.session_state.video_db if query.lower() in v['judul'].lower() or query.lower() in v['tag'].lower()]
     
     st.divider()
-
-    # Logic Filter
-    filtered = st.session_state.video_db
-    if query:
-        filtered = [v for v in filtered if query.lower() in v['judul'].lower() or query.lower() in v['tag'].lower()]
-    if tags:
-        filtered = [v for v in filtered if v['tag'] in tags]
-    
-    # Tampilkan Grid (2 kolom)
     if not filtered:
-        st.info("Tidak ada video yang ditemukan.")
+        st.info("Video tidak ditemukan.")
     else:
-        cols = st.columns(2)
-        for i, v in enumerate(filtered):
-            with cols[i % 2]:
-                with st.container():
-                    # Thumbnail (Palsu) - Gunakan LoremFlickr untuk gambar random
-                    st.image(f"https://loremflickr.com/400/225/video,{v['tag']}/all", use_column_width=True, caption=f"Kategori: {v['tag']}")
-                    st.subheader(v['judul'])
-                    st.write(f"👤 {v['kreator']} | ❤️ {v['likes']:,}")
-                    if st.button("Tonton", key=f"watch_{v['id']}"):
-                        st.video(v['url'])
-                    st.write("") # Jarak tambahan
+        for v in filtered:
+            with st.container():
+                st.subheader(v['judul'])
+                st.video(v['url'])
 
-# --- MODUL 3: UPLOAD VIDEO ---
+# --- MENU 3: UPLOAD ---
 elif menu == "📤 Upload":
-    st.header("📤 Upload Konten Baru")
-    st.caption("Dukung kreator lokal dengan mengupload video original kamu.")
-    st.write("---")
-
+    st.header("📤 Upload Konten")
     with st.form("form_upload", clear_on_submit=True):
         judul = st.text_input("Judul Video")
-        kreator = st.text_input("Nama Kreator / Channel")
-        kategori = st.selectbox("Kategori", ["Animasi", "Hiburan", "Pendidikan", "Gaya Hidup", "Teknologi"])
-        
-        # Di versi sederhana ini, kita hanya upload metadata. Video default dipasang.
-        st.info("Catatan: Di demo ini, video yang diupload akan menggunakan video dummy secara otomatis.")
-        
-        uploaded_file = st.file_uploader("Pilih file video (MP4)", type=["mp4"])
+        kreator = st.text_input("Nama Kreator")
+        kategori = st.selectbox("Kategori", ["Animasi", "Hiburan", "Pendidikan"])
+        url = st.text_input("Link Video YouTube", placeholder="https://www.youtube.com/watch?v=...")
         
         submit = st.form_submit_button("Publish Video")
-        
-        if submit and judul and kreator:
+        if submit and judul and url:
             new_id = len(st.session_state.video_db) + 1
-            new_entry = {
+            st.session_state.video_db.append({
                 "id": new_id,
                 "judul": judul,
                 "kreator": kreator,
                 "tag": kategori,
-                # Gunakan URL yang stabil untuk demo upload
-                "url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-                "likes": 0
-            }
-            st.session_state.video_db.append(new_entry)
-            st.success(f"Video '{judul}' berhasil di-upload ke sistem!")
+                "url": url,
+                "likes": 0,
+                "komentar": []
+            })
+            st.success("Video baru berhasil dipublikasikan!")
             st.balloons()
